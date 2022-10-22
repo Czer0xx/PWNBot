@@ -1,4 +1,3 @@
-import email
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
@@ -8,12 +7,16 @@ import time
 from selenium.webdriver.chrome.options import Options
 import pyfiglet
 import random
+import re
+import requests
+import json
 
 PATH = "chromedriver.exe"
 
 pwn_text = pyfiglet.figlet_format("PWN\nBOTTER", font = "slant")
 
 def main():
+    global visible
     global description_list
     global delay
     global end_delay
@@ -31,27 +34,74 @@ def main():
         description_list = ["Malina - określenie na znajomego", "Określenie na przyjaciela", "Malina - przyjaciel, kolega, znajomy", "Malina - kolega", "Malina - znajomy", "Malina to określenie na znajomego lub przyjaciela", "Malina to określenie na kolege"]
     else:
         description_list = description_input.split(",")
-    email = input("E-mail: ")
-    if email == "":
-        email = "jinnybkol@gmail.com"
     try:
-        delay = int(input("Delay (def. 0): "))
+        delay = int(input("Delay (def. 3): "))
     except ValueError:
-        delay = 0
-    try:
-        end_delay = int(input("Request End Delay (def. 5): "))
-    except ValueError:
-        end_delay = 5
+        delay = 3
+    visible = input("Visible? Y/N: ")
+    visible = visible.lower()
+    if visible == "":
+        visible = "n"
+
+def generate():
+    global login
+    global domain
+    global email
+    r = requests.post("https://www.1secmail.com/api/v1/?action=genRandomMailbox&count=1")
+    email = r.text
+    email = email.replace('["',"")
+    email = email.replace('"]',"")
+    splitted_email = email.split("@")
+    domain = splitted_email[1]
+    login = splitted_email[0]
+
+def verify():
+    url = f"https://www.1secmail.com/api/v1/?action=getMessages&login={login}&domain={domain}"
+    while True:
+        r = requests.get(url)
+        parsed = json.loads(r.text)
+        try:
+            if 'id' in parsed[0]:
+                for url in parsed:
+                    id = url["id"]
+                url2 = f"https://www.1secmail.com/api/v1/?action=readMessage&login={login}&domain={domain}&id={id}"
+                response = requests.get(url2)
+                response.raise_for_status()
+                jsonResponse = response.json()
+                for key, value in jsonResponse.items():
+                    c = re.findall("<a href=\".*?(?=\")", jsonResponse["body"])
+                    c = "".join(c)
+                    link = c.replace('<a href="', "")
+                    options = Options()
+                    if visible == "n":
+                        options.add_argument('--headless')
+                        options.add_argument('--disable-gpu')
+                    options.add_argument("--log-level=3")
+                    options.add_experimental_option('excludeSwitches', ['enable-logging'])
+                    driver = webdriver.Chrome(options=options, service=Service(ChromeDriverManager().install()))
+                    driver.get(link)
+                    time.sleep(2)
+                    print("Email sucessfully verified!")
+                    driver.quit()
+                    break
+                break
+                
+        except:
+            pass
 
 def bot():
     global sequence
     sent = 0
+    generate()
+    print(f"\nGenerated email: {email}")
     description = random.choice(description_list)
     options = Options()
-    options.add_argument('--headless')
-    options.add_argument('--disable-gpu')
+    if visible == "n":
+        options.add_argument('--headless')
+        options.add_argument('--disable-gpu')
+    options.add_argument("--log-level=3")
+    options.add_experimental_option('excludeSwitches', ['enable-logging'])
     driver = webdriver.Chrome(options=options, service=Service(ChromeDriverManager().install()))
-    driver.minimize_window()
     driver.get("https://sjp.pwn.pl/mlodziezowe-slowo-roku/mlodziezowe-slowo-roku;202298.html")
     try:
         driver.find_element(By.XPATH, '//*[@id="floater-send"]').click()
@@ -100,9 +150,9 @@ def bot():
     if sent == 1:
         sequence = sequence + 1
         print(f"\nSequence {sequence} done!\n")
+        verify()
     else:
         print("\nSequence Failed! :(\n")
-    time.sleep(end_delay)
     driver.quit()
     bot()
 
@@ -111,10 +161,3 @@ if __name__ == "__main__":
     sequence = 0
     main()
     bot()
-
-# slowo //*[@id="floater-word"]
-# opis //*[@id="floater-definition"]
-# email //*[@id="floater-email"]
-# wiek //*[@id="age-range"]
-# eula //*[@id="floater"]/div[3]/div[1]/div/div/div[6]/label/span[1]
-# send //*[@id="floater-send"]
