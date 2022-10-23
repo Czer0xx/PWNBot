@@ -24,24 +24,25 @@ def main():
     global word
     time.sleep(2)
     print(pwn_text)
-    word = input("Word: ")
-    if word == "":
-        word = "Malina"
-    else:
-        word = word
-    description_input = input("Descriptions (separated by comma ','): ")
-    if description_input == "":
-        description_list = ["Malina - określenie na znajomego", "Określenie na przyjaciela", "Malina - przyjaciel, kolega, znajomy", "Malina - kolega", "Malina - znajomy", "Malina to określenie na znajomego lub przyjaciela", "Malina to określenie na kolege"]
-    else:
+    while True:
+        word = input("Word: ")
+        if word == "":
+            print("\nCannot be empty!\n")
+            continue
+        description_input = input("Descriptions (separated by comma ','): ")
+        if description_input == "":
+            print("\nCannot be empty!\n")
+            continue
         description_list = description_input.split(",")
-    try:
-        delay = int(input("Delay (def. 3): "))
-    except ValueError:
-        delay = 3
-    visible = input("Visible? Y/N: ")
-    visible = visible.lower()
-    if visible == "":
-        visible = "n"
+        try:
+            delay = int(input("Delay (def. 3): "))
+        except ValueError:
+            delay = 3
+        visible = input("Visible? Y/N: ")
+        visible = visible.lower()
+        if visible == "":
+            visible = "n"
+        break
 
 def generate():
     global login
