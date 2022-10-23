@@ -7,7 +7,14 @@
   <a href="https://buymeacoffee.com/Czer0x"><img src="https://img.shields.io/badge/$-donate-ff69b4.svg?maxAge=2592000&amp;style=flat"></a>
  </p>
  
+ <a href="https://www.buymeacoffee.com/Czer0x" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" ></a>
+ 
 <p align="center">
     <img src="https://i.postimg.cc/J07MfYkG/Film-bez-tytu-u-Wykonano-za-pomoc-Clipchamp.gif">
- 
-<a href="https://www.buymeacoffee.com/Czer0x" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" ></a>
+  
+ ## Features
+  
+ * Autocomplete form.
+    - Variables can be specified on script launch.
+ * Verifying vote using tempmail with generated email account.
+ * Infinite loop.
