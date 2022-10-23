@@ -27,13 +27,16 @@ def main():
     while True:
         word = input("Word: ")
         if word == "":
-            print("\nCannot be empty!\n")
-            continue
+            word = "Malina"
+            # print("\nCannot be empty!\n")
+            # continue
         description_input = input("Descriptions (separated by comma ','): ")
         if description_input == "":
-            print("\nCannot be empty!\n")
-            continue
-        description_list = description_input.split(",")
+            description_list = ["Malina - określenie na znajomego", "Określenie na przyjaciela", "Malina - przyjaciel, kolega, znajomy", "Malina - kolega", "Malina - znajomy", "Malina to określenie na znajomego lub przyjaciela", "Malina to określenie na kolege"]
+            # print("\nCannot be empty!\n")
+            # continue
+        else:
+            description_list = description_input.split(",")
         try:
             delay = int(input("Delay (def. 3): "))
         except ValueError:
@@ -73,17 +76,12 @@ def verify():
                     c = re.findall("<a href=\".*?(?=\")", jsonResponse["body"])
                     c = "".join(c)
                     link = c.replace('<a href="', "")
-                    options = Options()
-                    if visible == "n":
-                        options.add_argument('--headless')
-                        options.add_argument('--disable-gpu')
-                    options.add_argument("--log-level=3")
-                    options.add_experimental_option('excludeSwitches', ['enable-logging'])
-                    driver = webdriver.Chrome(options=options, service=Service(ChromeDriverManager().install()))
                     driver.get(link)
                     time.sleep(2)
-                    print("Email sucessfully verified!")
+                    print("\nEmail sucessfully verified!")
+                    print(f"\nSequence {sequence} done!")
                     driver.quit()
+                    bot()
                     break
                 break
                 
@@ -91,10 +89,9 @@ def verify():
             pass
 
 def bot():
+    global driver
     global sequence
     sent = 0
-    generate()
-    print(f"\nGenerated email: {email}")
     description = random.choice(description_list)
     options = Options()
     if visible == "n":
@@ -103,54 +100,67 @@ def bot():
     options.add_argument("--log-level=3")
     options.add_experimental_option('excludeSwitches', ['enable-logging'])
     driver = webdriver.Chrome(options=options, service=Service(ChromeDriverManager().install()))
-    driver.get("https://sjp.pwn.pl/mlodziezowe-slowo-roku/mlodziezowe-slowo-roku;202298.html")
+    try:
+        driver.get("https://sjp.pwn.pl/mlodziezowe-slowo-roku/mlodziezowe-slowo-roku;202298.html")
+    except:
+        driver.quit()
+        bot()
+    generate()
+    print(f"\nGenerated email: {email}")
     try:
         driver.find_element(By.XPATH, '//*[@id="floater-send"]').click()
         print("\nShowed policy")
     except: 
-        pass
+        driver.quit()
+        bot()
     time.sleep(delay)
     try:
         driver.find_element(By.XPATH, '//*[@id="consent-modal-yr73k"]/div/div/div[3]/button').click()
         print("Accepted policy")
     except: 
-        pass
+        driver.quit()
+        bot()
     try:
         driver.find_element(By.XPATH, '//*[@id="floater-word"]').send_keys(word)
         print(f"Entered word: {word}")
     except: 
-        pass
+        driver.quit()
+        bot()
     try:
         driver.find_element(By.XPATH, '//*[@id="floater-definition"]').send_keys(description)
         print(f"Entered description: {description}")
     except: 
-        pass
+        driver.quit()
+        bot()
     try:
         driver.find_element(By.XPATH, '//*[@id="floater-email"]').send_keys(email)
         print(f"Entered email: {email}")
     except: 
-        pass
+        driver.quit()
+        bot()
     try:
         x = driver.find_element(By.XPATH, '//*[@id="age-range"]')
         drop = Select(x)
         drop.select_by_value("13 - 17")
         print("Selected age: '13 - 17'")
     except: 
-        pass
+        driver.quit()
+        bot()
     try:
         driver.find_element(By.XPATH, '//*[@id="floater"]/div[3]/div[1]/div/div/div[6]/label/span[1]').click()
         print("Accepted Eula")
     except: 
-        pass
+        driver.quit()
+        bot()
     try:
         driver.find_element(By.XPATH, '//*[@id="floater-send"]').click()
         print(f"\nWord: {word}\nDesc: {description}\nE-mail: {email}\n\nSent!")
         sent = 1
     except: 
-        pass
+        driver.quit()
+        bot()
     if sent == 1:
         sequence = sequence + 1
-        print(f"\nSequence {sequence} done!\n")
         verify()
     else:
         print("\nSequence Failed! :(\n")
