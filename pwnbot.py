@@ -16,6 +16,7 @@ PATH = "chromedriver.exe"
 pwn_text = pyfiglet.figlet_format("PWN\nBOTTER", font = "slant")
 
 def main():
+    global rate_limit
     global visible
     global description_list
     global delay
@@ -41,10 +42,14 @@ def main():
             delay = int(input("Delay (def. 3): "))
         except ValueError:
             delay = 3
-        visible = input("Visible? Y/N: ")
+        visible = input("Visible? Y/N (def. N): ")
         visible = visible.lower()
         if visible == "":
             visible = "n"
+        rate_limit = input("Rate Limit? Y/N (def. Y): ")
+        rate_limit = rate_limit.lower()
+        if rate_limit == "":
+            rate_limit = "y"
         break
 
 def generate():
@@ -91,6 +96,11 @@ def verify():
 def bot():
     global driver
     global sequence
+    if rate_limit == "y":
+        if sequence != 0:
+            if sequence % 2 == 0:
+                print("\nSleeping for 60s")
+                time.sleep(60)
     sent = 0
     description = random.choice(description_list)
     options = Options()
